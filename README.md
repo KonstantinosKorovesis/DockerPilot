@@ -2,4 +2,5 @@
 
 Hello everyone!
 Please write your names:
-I am Kefala Charikleia Maria! 
+Kefala Charikleia Maria
+Korovesis Konstantinos
