@@ -2,6 +2,6 @@
 
 Hello everyone!
 Please write your names:
-Kefala Charikleia Maria
+Kefala Charikleia
 Korovesis Konstantinos
 Elena Gounari
