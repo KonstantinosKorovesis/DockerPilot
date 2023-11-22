@@ -21,8 +21,7 @@ public class Executor {
      * If the Container is already running, only notifies the user that no action was taken.
      * 
      * @param container The container to be started.
-     * @return Does not return anything. Only prints the process of attempting to start the given Container.
-     * @see Container
+     * @return Does not return anything. Only prints the process of attempting to start the given Container. 
      */
     public static void startContainer(Container container) {
         if ("running".equalsIgnoreCase(container.getState())) {
@@ -45,8 +44,7 @@ public class Executor {
      * If the Container is already exited, only notifies the user that no action was taken.
      * 
      * @param container The container to be started.
-     * @return Does not return anything. Only prints the process of attempting to stop the given Container.
-     * @see Container
+     * @return Does not return anything. Only prints the process of attempting to stop the given Container. 
      */
     public static void stopContainer(Container container) {
         if ("exited".equalsIgnoreCase(container.getState())) {

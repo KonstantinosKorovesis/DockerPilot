@@ -30,21 +30,21 @@ public class Main {
     protected static DockerClient dockerClient = DockerClientImpl.getInstance(config, httpClient);
     //initialize scanner for user input
     protected static Scanner scanner = new Scanner(System.in);
-    /** The main method and entry point the program. Handles the dockerClient and user interactions.
-     *
+    /** The main method and entry point the application. Handles the dockerClient and user interactions.
+     * 
      * @param args Command-line arguments, currently not used in any way.
      */
     public static void main(String[] args) {
-	try {
-        	Monitor.setUpMonitor(dockerClient);
-        	Executor.setUpExecutor(dockerClient);
-	} catch (RuntimeException e) {
-		System.out.println("[ERROR] Make sure Docker Desktop is open and you've exposed Docker daemon on tcp://localhost:2375 without TLS");
-		System.err.println(e);
-		System.exit(1);
+        try {
+            Monitor.setUpMonitor(dockerClient);
+            Executor.setUpExecutor(dockerClient);
+        } catch (RuntimeException e) {
+            System.out.println("[ERROR] Make sure Docker Desktop is open and you've exposed Docker daemon on tcp://localhost:2375 without TLS");
+            System.err.println(e);
+            System.exit(1);
         }
-        
-	int choice;
+
+        int choice;
         do {
             System.out.println("\n [DOCKER MANAGER MENU]");
             System.out.println("[1] Print All Containers");
@@ -52,9 +52,9 @@ public class Main {
             System.out.println("[3] Print All Images");
             System.out.println("[4] Show Table of All Images");
             System.out.println("[5] Manage Containers");
-            System.out.println("[-1] Exit Docker Manager\n");
+            System.out.println("[-1] Exit Docker Manager\n");  
             choice = getInput(1, 5, "Select an Option: ");
-
+            
             switch (choice) {
                 case 1:
                     System.out.println("\n-- ALL CONTAINERS LIST --");
@@ -62,7 +62,7 @@ public class Main {
                     break;
                 case 2:
                     System.out.println("\nDisplaying Containers table...");
-                    ContainerModel.showTable(Monitor.getAllContainers());
+                    ContainerModel.showTable(Monitor.getAllContainers(), "All Containers");
                     break;
                 case 3:
                     System.out.println("\n-- ALL IMAGES LIST --");
@@ -70,7 +70,7 @@ public class Main {
                     break;
                 case 4:
                     System.out.println("\nDisplaying Images table...");
-                    ImageModel.showTable(Monitor.getImages());
+                    ImageModel.showTable(Monitor.getImages(), "All Images");
                     break;
                 case 5:
                     manageContainers();
@@ -80,7 +80,7 @@ public class Main {
         System.out.println("\nExiting Docker Manager...");
         scanner.close();
 
-	try {
+        try {
             dockerClient.close();
         } catch (IOException e) {
             System.out.println("[ERROR] Something went wrong while trying to close the dockerClient");
@@ -119,7 +119,7 @@ public class Main {
         } while (choice != -1 && choice < low || choice > high);
         return choice;
     }
-    /** Method for handling Containers when the user picks option [5] Manage Containers.
+    /** Method for handling Containers when the user picks the option Manage Containers.
      * 
      * @return No return values, only printing.
      */
@@ -135,38 +135,47 @@ public class Main {
             System.out.println("[-1] Exit Container Manager\n");  
             choice = getInput(1, 5, "Select an Option: ");
 
-            int containerNum = Monitor.getAllContainers().size();
             switch (choice) {
                 case 1:
-                    ContainerModel.printContainers(Monitor.getAllContainers());
-                    System.out.println();
-                    containerNum = getInput(1, containerNum, "Enter Container Number to Start (-1 to cancel): ");
-                    if (containerNum != -1) {
+                    if (Monitor.getInactiveContainers().size() >= 1) {
+                        System.out.println("\n-- ALL INACTIVE CONTAINERS --");
+                        ContainerModel.printContainers(Monitor.getInactiveContainers());
                         System.out.println();
-                        Executor.startContainer(Monitor.getAllContainers().get(containerNum - 1));
+                        choice = getInput(1, Monitor.getInactiveContainers().size(), "Enter Container Number to Start (-1 to cancel): ");
+                        if (choice != -1) {
+                            System.out.println();
+                            Executor.startContainer(Monitor.getInactiveContainers().get(choice - 1));
+                        } else {
+                            choice = 0;
+                        }
+                    } else {
+                        System.out.println("\nThere are no Inactive Containers to start.");
                     }
                     break;
                 case 2:
                     if (Monitor.getActiveContainers().size() >= 1) {
+                        System.out.println("\n-- ALL ACTIVE CONTAINERS --");
                         ContainerModel.printContainers(Monitor.getActiveContainers());
                         System.out.println();
-                        containerNum = getInput(1, containerNum, "Enter Container Number to Stop (-1 to cancel): ");
-                        if (containerNum != -1) {
+                        choice = getInput(1, Monitor.getActiveContainers().size(), "Enter Container Number to Stop (-1 to cancel): ");
+                        if (choice != -1) {
                             System.out.println();
-                            Executor.stopContainer(Monitor.getActiveContainers().get(containerNum - 1));
+                            Executor.stopContainer(Monitor.getActiveContainers().get(choice - 1));
+                        } else {
+                            choice = 0;
                         }
                     } else {
-                        System.out.println("There is no active container!");
+                        System.out.println("\nThere are no Active Containers to stop.");
                     }
                     break;
                 case 3:
-                    ContainerModel.showTable(Monitor.getAllContainers());
+                    ContainerModel.showTable(Monitor.getAllContainers(), "All Containers");
                     break;
                 case 4:
-                    ContainerModel.showTable(Monitor.getActiveContainers());
+                    ContainerModel.showTable(Monitor.getActiveContainers(), "Active Containers");
                     break;
                 case 5:
-                    ContainerModel.showTable(Monitor.getInactiveContainers());
+                    ContainerModel.showTable(Monitor.getInactiveContainers(), "Inactive Containers");
                     break;
             }
         } while (choice != -1);

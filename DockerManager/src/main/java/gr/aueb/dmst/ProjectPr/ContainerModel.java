@@ -6,19 +6,28 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import javax.swing.JFrame;
-import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JScrollPane;
 import javax.swing.table.DefaultTableModel;
 
 import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.Container;
 
+/** The Container Model Class 
+ * used for getting and displaying information regarding Container objects.
+ * @see Container
+ */
 public class ContainerModel {
     protected final static String[] dataColumns = {"Number", "Name", "ID", "Image", "Status", "Date Created"};
 
     protected static String getFormattedName(Container container) {
         String name = (container.getNames()[0]).split("/")[1];
         return name;
+    }
+    
+    protected static String getID(Container container) {
+        String id = (container.getId()).split(":")[0];
+        return id;
     }
 
     protected static String getFormattedID(Container container) {
@@ -27,7 +36,7 @@ public class ContainerModel {
         return id;
     }
     
-    protected static String getFormattedDate(Container container) {
+    protected static String getFormattedDateTime(Container container) {
         Instant instant = Instant.ofEpochSecond(container.getCreated());
         ZoneId zoneId = ZoneId.systemDefault();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
@@ -48,16 +57,25 @@ public class ContainerModel {
         return "";
     }
 
-    //prints the basic information about the given Container in one line
+    /** Method that is used to print the basic information about the given Container in a single line.
+     * 
+     * @param container The passed Container.
+     * @return Does not return anything.
+     */
     public static void printContainer(Container container) {
         String id = getFormattedID(container);
         String state = container.getState();
         String name = getFormattedName(container);
-        String formattedDate = getFormattedDate(container); 
+        String formattedDate = getFormattedDateTime(container); 
         System.out.printf("[ID: %.12s]  [State: %s]  [Name: %s]  [Created: %s]\n", id, state, name, formattedDate);
     }
 
-    //prints and numbers all given Containers
+    /** Method that is used to print the basic information about the given Container objects.
+     * Calls the printContainer method for each of the given Container objects.
+     * 
+     * @param containers The passed Container Objects.
+     * @return Does not return anything.
+     */
     public static void printContainers(List<Container> containers) {
         int i = 1;
         for (Container container : containers) {
@@ -66,9 +84,13 @@ public class ContainerModel {
         }
     }
 
-    //returns a 2D array with each row representing an entry of information about a single Container
-    //rows: the size of the dataColumns {"Number", "Name", "ID", "Image", "Status", "Date Created"}
-    //columns: the number of containers
+    /** Method for creating a 2D String Array with each row representing an entry of data about a single Container.
+     * Row Number: The number of the passed Container Objects in the List.
+     * Column Number: The size of dataColumns = {"Number", "Name", "ID", "Image", "Status", "Date Created"}
+     * 
+     * @param containers The passed {@link List} of {@link Container} Objects.
+     * @return The 2D String Array of data regarding the passed {@link Container} Objects.
+     */
     public static String[][] getContainerModel(List<Container> containers) {
         String[][] containerModel = new String[containers.size()][dataColumns.length];
         int i = 0;
@@ -79,14 +101,19 @@ public class ContainerModel {
             containerModel[i][2] = getFormattedID(container);
             containerModel[i][3] = getFormattedImageName(container);
             containerModel[i][4] = container.getStatus();
-            containerModel[i][5] = getFormattedDate(container);
+            containerModel[i][5] = getFormattedDateTime(container);
             i++;
         }
         return containerModel;
     }
 
-    //creates a frame (window) and displays the given Containers List
-    public static void showTable(List<Container> containers) {
+    /** Method for creating the {@link JFrame} and displaying the passed Container Objects in the List.
+     * 
+     * @param containers The passed {@link List} of {@link Container} Objects.
+     * @param title The title of the display Window.
+     * @return Does not return anything.
+     */
+    public static void showTable(List<Container> containers, String title) {
         DefaultTableModel model = new DefaultTableModel() {
             String[] columns = dataColumns;
             @Override 
@@ -104,7 +131,7 @@ public class ContainerModel {
         };
 
         JTable table = new JTable(model);
-        JScrollPane spane = new JScrollPane(table);
+        JScrollPane sPane = new JScrollPane(table);
         JFrame frame = new JFrame();
 
         String[][] containerModel = getContainerModel(containers);
@@ -112,11 +139,11 @@ public class ContainerModel {
             model.addRow(row);
         }
         
-        frame.setTitle("All Containers");
+        frame.setTitle(title);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setAlwaysOnTop(true);
         frame.setSize(800,600);
-        frame.add(spane);
+        frame.add(sPane);
         frame.setVisible(true);
     }
 }
