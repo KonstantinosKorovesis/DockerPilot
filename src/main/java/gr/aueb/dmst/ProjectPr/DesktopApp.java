@@ -329,7 +329,7 @@ public class DesktopApp extends JFrame{
 
             //run the JFrame and add it to the EDT (Event Dispatch Thread) to be initialized and updated
             SwingUtilities.invokeLater(() -> {
-                new DesktopApp1();
+                new DesktopApp();
             });
 
 
