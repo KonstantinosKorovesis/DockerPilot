@@ -5,11 +5,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>gr.aueb.dmst.ProjectPr</groupId>
-  <artifactId>DockerManager</artifactId>
-  <version>1.2</version>
+  <artifactId>DockerPilot</artifactId>
+  <version>1.3</version>
   <packaging>jar</packaging>
   
-  <name>DockerManager</name>
+  <name>DockerPilot</name>
 
   <!-- Encoding and Java version properties-->
   <properties>
@@ -72,6 +72,12 @@
       <groupId>com.massisframework</groupId>
       <artifactId>j-text-utils</artifactId>
       <version>0.3.4</version>
+    </dependency>
+    <!-- Related to the API and converting data into JSON -->
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.10.1</version>
     </dependency>
   </dependencies>
 
@@ -141,3 +147,4 @@
     </plugins>
   </build>
 </project>
+
