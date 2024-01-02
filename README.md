@@ -34,7 +34,7 @@ Now that the application is up and running, you can explore various functionalit
 ## The Data Structures and Algorithms used in the code
 
 
-##Creators
+## Creators
 -**Kefala Charikleia Maria**
 -**Korovesis Konstantinos Chrysovalantis**
 -**Gounari Eleni**
