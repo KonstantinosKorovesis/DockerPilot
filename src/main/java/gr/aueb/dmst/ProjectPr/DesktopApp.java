@@ -85,6 +85,7 @@ public class DesktopApp extends JFrame {
 
         JButton runButton = new JButton("Run");
         runButton.setPreferredSize(new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT));
+        runButton.setBackground(Color.GREEN);
         runButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -105,6 +106,7 @@ public class DesktopApp extends JFrame {
 
         JButton stopButton = new JButton("Stop");
         stopButton.setPreferredSize(new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT));
+        stopButton.setBackground(Color.RED);
         stopButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -125,6 +127,7 @@ public class DesktopApp extends JFrame {
 
         JButton inspectButton = new JButton("Inspect");
         inspectButton.setPreferredSize(new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT));
+        inspectButton.setBackground(Color.GRAY);
         inspectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -144,6 +147,7 @@ public class DesktopApp extends JFrame {
         
         JButton histogramButton = new JButton("Create Measurement");
         histogramButton.setPreferredSize(new Dimension(BUTTON_WIDTH * 2, BUTTON_HEIGHT));
+        histogramButton.setBackground(Color.BLUE);
         histogramButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -209,6 +213,7 @@ public class DesktopApp extends JFrame {
 
         JButton createButton = new JButton("Create New Container");
         createButton.setPreferredSize(new Dimension(BUTTON_WIDTH * 2, BUTTON_HEIGHT));
+        createButton.setBackground(Color.BLUE);
         createButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -230,6 +235,7 @@ public class DesktopApp extends JFrame {
 
         JButton inspectButton = new JButton("Inspect");
         inspectButton.setPreferredSize(new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT));
+        inspectButton.setBackground(Color.GRAY);
         inspectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -294,11 +300,15 @@ public class DesktopApp extends JFrame {
         JScrollBar verticalScrollBar = scrollPane.getVerticalScrollBar();
         
         JLabel dateInfoLabel = new JLabel("Measurement Date: -");
+        dateInfoLabel.setForeground(Color.BLACK);
         JLabel idInfoLabel = new JLabel("Measurement ID: -");
+        idInfoLabel.setForeground(Color.BLACK);
         JLabel containerInfoLabel = new JLabel("Running Containers: -");
+        containerInfoLabel.setForeground(Color.BLACK);
         
         JButton chooseButton = new JButton("Choose Measurement");
         chooseButton.setPreferredSize(new Dimension(BUTTON_WIDTH * 2, BUTTON_HEIGHT));
+        chooseButton.setBackground(Color.BLUE);
         chooseButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
