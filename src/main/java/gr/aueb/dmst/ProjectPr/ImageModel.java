@@ -3,12 +3,9 @@ package gr.aueb.dmst.ProjectPr;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-
-import javax.swing.JFrame;
-import javax.swing.JTable;
-import javax.swing.JScrollPane;
-import javax.swing.table.DefaultTableModel;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.Container;
@@ -17,11 +14,13 @@ import com.github.dockerjava.api.model.Container;
  * used for getting and displaying information regarding Image objects.
  * @see Image
  */
-public final class ImageModel {
-    /** The columns of the Image Table displayed. */
-    private final static String[] dataColumns = {"Number", "Name", "ID", "Size", "Container No.", "Date Created"};
+public class ImageModel {
+    private ImageModel() {
+        throw new UnsupportedOperationException(
+        "The ImageModel Class is a utility class and cannot be instantiated.");
+    }
 
-    protected static String getFormattedName(Image image) {
+    protected static String getName(Image image) {
         String name = (image.getRepoTags()[0]).split(":")[0];
         return name;
     }
@@ -43,10 +42,18 @@ public final class ImageModel {
         return formattedSize + " MB";
     }
 
-    protected static String getFormattedDateTime(Image image) {
+    protected static String getFormattedTime(Image image) {
         Instant instant = Instant.ofEpochSecond(image.getCreated());
         ZoneId zoneId = ZoneId.systemDefault();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        String formattedTime = instant.atZone(zoneId).format(formatter);
+        return formattedTime;
+    }
+
+    protected static String getFormattedDate(Image image) {
+        Instant instant = Instant.ofEpochSecond(image.getCreated());
+        ZoneId zoneId = ZoneId.systemDefault();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         String formattedDate = instant.atZone(zoneId).format(formatter);
         return formattedDate;
     }
@@ -61,90 +68,38 @@ public final class ImageModel {
         return c;
     }
 
-    /** Method that is used to print the basic information about the given Image in a single line.
-     *
-     * @param image The passed Image.
-     */
-    public static void printImage(Image image) {
-        String id = getFormattedID(image);
-        String name = getFormattedName(image);
-        String formattedSize = getFormattedSize(image);
-        String formattedDate = getFormattedDateTime(image);
-        System.out.printf("[ID: %.12s]  [Name: %s]  [Size: %s]  [Created: %s]\n", id, name, formattedSize, formattedDate);
+    protected static String getLabelsString(Image image) {
+        String labelsString = "";
+        Map<String, String> labels = image.getLabels();
+        if (labels != null) {
+            for (String key : labels.keySet()) {
+                labelsString += "[" + key + " - " + labels.get(key) + "] ";
+            }
+        }
+        return labelsString;
     }
 
-    /** Method that is used to print the basic information about the given Image objects.
-     * Calls the printContainer method for each of the given Image objects.
-     *
-     * @param images The passed Image Objects.
-     */
-    public static void printImages(List<Image> images) {
-        int i = 1;
-        for (Image image : images) {
-            System.out.print("[" + i++ + "] ");
-            printImage(image);
-        }
+    public static Map<String, String> getImageDataMap(Image image) {
+        Map<String, String> imageMap = new LinkedHashMap<>();
+        imageMap.put("ID", ImageModel.getID(image));
+        imageMap.put("ID_12", ImageModel.getFormattedID(image));
+        imageMap.put("Labels", ImageModel.getLabelsString(image));
+        imageMap.put("Size", ImageModel.getFormattedSize(image));
+        imageMap.put("Name", ImageModel.getName(image));
+        imageMap.put("Date Created", ImageModel.getFormattedDate(image));
+        imageMap.put("Time Created", ImageModel.getFormattedTime(image));
+        imageMap.put("Container Number", String.valueOf(ImageModel.getContainerNumber(image)));
+        return imageMap;
     }
 
-    /** Method for creating a 2D String Array with each row representing an entry of data about a single Image.
-     * Row Number: The number of the passed Image Objects in the List.
-     * Column Number: The size of dataColumns = {"Number", "Name", "ID", "Size", "Container No.", "Date Created"}
-     *
-     * @param images The passed {@link List} of {@link Image} Objects.
-     * @return The 2D String Array of data regarding the passed {@link Image} Objects.
-     */
-    public static String[][] getImageTable(List<Image> images) {
-        String[][] imageModel = new String[images.size()][dataColumns.length];
-        int i = 0;
-        int n = 1;
-        for (Image image : images) {
-            imageModel[i][0] = String.valueOf(n++);
-            imageModel[i][1] = getFormattedName(image);
-            imageModel[i][2] = getFormattedID(image);
-            imageModel[i][3] = getFormattedSize(image);
-            imageModel[i][4] = String.valueOf(getContainerNumber(image));
-            imageModel[i][5] = getFormattedDateTime(image);
-            i++;
+    public static Map<String, String> getImageDataMap(String imageID) {
+        Map<String, String> imageMap = new HashMap<>();
+        for (Image image : Monitor.getImages()) {
+            if (ImageModel.getID(image).equals(imageID) || ImageModel.getID(image).startsWith(imageID)) {
+                imageMap = getImageDataMap(image);
+                break;
+            }
         }
-        return imageModel;
-    }
-
-    /** Method for creating the {@link JFrame} and displaying the passed Image Objects in the List.
-     *
-     * @param images The passed {@link List} of {@link Image} Objects.
-     * @param title The title of the display Window.
-     */
-    public static void showTable(List<Image> images, String title) {
-        DefaultTableModel model = new DefaultTableModel() {
-            String[] columns = dataColumns;
-            @Override
-            public int getColumnCount() {
-                return columns.length;
-            }
-            @Override
-            public String getColumnName(int col) { 
-                return columns[col]; 
-            }
-            @Override
-            public boolean isCellEditable(int row, int col) {
-                return false;
-            }
-        };
-
-        JTable table = new JTable(model);
-        JScrollPane sPane = new JScrollPane(table);
-        JFrame frame = new JFrame();
-
-        String[][] imageModel = getImageTable(images);
-        for (String[] row : imageModel) {
-            model.addRow(row);
-        }
-
-        frame.setTitle(title);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setAlwaysOnTop(true);
-        frame.setSize(800,600);
-        frame.add(sPane);
-        frame.setVisible(true);
+        return imageMap;
     }
 }
