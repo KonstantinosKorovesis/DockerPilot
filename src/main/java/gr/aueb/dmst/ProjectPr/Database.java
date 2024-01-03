@@ -8,12 +8,13 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.ArrayList;
 import com.github.dockerjava.api.model.Container;
 
 public class Database {
     //set app directory name and location, set database name
     public static boolean setUpComplete = false;
-    public static final String APP_DIRECTORY_NAME = ".dockermanager";
+    public static final String APP_DIRECTORY_NAME = ".dockerpilot";
     public static final String APP_DIRECTORY_PATH = System.getProperty("user.home") + File.separator + APP_DIRECTORY_NAME;
     public static final String DATABASE_NAME = "database" + ".db";
     public static final String DATABASE_PATH = APP_DIRECTORY_PATH + File.separator + DATABASE_NAME;
@@ -84,10 +85,9 @@ public class Database {
         String createTableContainerData = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME_2 + " (\n"
                             + " containerId     TEXT NOT NULL,\n"
                             + " image           TEXT NOT NULL,\n"
-                            + " label           TEXT,\n"
                             + " name            TEXT NOT NULL,\n"
                             + " dateCreated     DATE NOT NULL,\n"
-                            + " status          TEXT NOT NULL,\n"
+                            + " state           TEXT NOT NULL,\n"
                             + " measurementId   INTEGER NOT NULL,\n"
                             + " FOREIGN KEY(measurementId) REFERENCES "  + TABLE_NAME_1 + "(measurementId),\n"
                             + " PRIMARY KEY(containerId, measurementId)\n"
@@ -111,7 +111,7 @@ public class Database {
         try (Connection conn = DriverManager.getConnection(JDBC_URL);
             Statement stmt = conn.createStatement();) {
             stmt.executeUpdate(sqlInsert);
-            //get and return number of current pack
+            //get and return number of current measurement
             String selectLastInsertedPackId = "SELECT * FROM " + TABLE_NAME_1 + " WHERE measurementId = last_insert_rowid()";
             try (ResultSet rs = stmt.executeQuery(selectLastInsertedPackId);) {
                 int measurementId = rs.getInt("measurementId");
@@ -129,7 +129,7 @@ public class Database {
         for (Container container : containers) {
             String[] row = ContainerModel.getContainerEntry(container);
             String sqlInsert = "INSERT INTO " + TABLE_NAME_2 +
-                "(containerId, image, label, name, dateCreated, status, measurementId) VALUES (?,?,?,?,?,?,?)";
+                "(containerId, image, name, dateCreated, state, measurementId) VALUES (?,?,?,?,?,?)";
             try (Connection conn = DriverManager.getConnection(JDBC_URL);
                 PreparedStatement pstmt = conn.prepareStatement(sqlInsert);) {
                 int i = 0;
@@ -138,8 +138,7 @@ public class Database {
                 pstmt.setString(3, row[i++]);
                 pstmt.setString(4, row[i++]);
                 pstmt.setString(5, row[i++]);
-                pstmt.setString(6, row[i++]);
-                pstmt.setInt(7, measurementId);
+                pstmt.setInt(6, measurementId);
                 pstmt.executeUpdate();
             } catch (SQLException e) {
                 System.err.println("[ERROR] Failed to insert into " + TABLE_NAME_2 + " table.");
@@ -147,5 +146,98 @@ public class Database {
             }
         }
     }
-}
 
+    //SELECTS
+    public static String[] selectAllDates() {
+        List<String> datesList = new ArrayList<String>();
+        try (Connection conn = DriverManager.getConnection(JDBC_URL);
+            Statement stmt = conn.createStatement();) {
+            String selectAllDates = "SELECT DISTINCT measurementDate FROM " + TABLE_NAME_1;
+            try (ResultSet rs = stmt.executeQuery(selectAllDates);) {
+                while (rs.next()) {
+                    datesList.add(rs.getString("measurementDate"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[ERROR] Failed to select all distinct dates.");
+            System.err.println(e);
+        }
+        String[] s = datesList.toArray(new String[0]);
+        return s;
+    }
+
+    public static String[] selectMeasurementIdsOnDate(String date) {
+        List<String> idList = new ArrayList<String>();
+        try (Connection conn = DriverManager.getConnection(JDBC_URL);
+            Statement stmt = conn.createStatement();) {
+            String selectIds = "SELECT DISTINCT measurementId FROM " + TABLE_NAME_1 + "\n"
+                             + "WHERE measurementDate = \"" + date + "\"";
+            try (ResultSet rs = stmt.executeQuery(selectIds);) {
+                while (rs.next()) {
+                    idList.add(rs.getString("measurementId"));
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[ERROR] Failed to select all measurement IDs based on a specific date.");
+            System.err.println(e);
+        }
+        String[] s = idList.toArray(new String[0]);
+        return s;
+    }
+
+    public static int selectRunningContainerCount(String measurementId) {
+        int count = 0;
+        try (Connection conn = DriverManager.getConnection(JDBC_URL);
+            Statement stmt = conn.createStatement();) {
+            String selectRunningContainerCount = "SELECT COUNT(*) AS count FROM " + TABLE_NAME_2 + "\n"
+                             + "WHERE measurementId = " + measurementId + " AND state = \"running\"";
+            try (ResultSet rs = stmt.executeQuery(selectRunningContainerCount);) {
+                count = rs.getInt("count");
+            }
+        } catch (SQLException e) {
+            System.err.println("[ERROR] Failed to select the running container count given a specific measurementId.");
+            System.err.println(e);
+        }
+        return count;
+    }
+
+    public static int selectTotalContainerCount(String measurementId) {
+        int count = 0;
+        try (Connection conn = DriverManager.getConnection(JDBC_URL);
+            Statement stmt = conn.createStatement();) {
+            String selectRunningContainerCount = "SELECT COUNT(*) AS count FROM " + TABLE_NAME_2 + "\n"
+                             + "WHERE measurementId = " + measurementId;
+            try (ResultSet rs = stmt.executeQuery(selectRunningContainerCount);) {
+                count = rs.getInt("count");
+            }
+        } catch (SQLException e) {
+            System.err.println("[ERROR] Failed to select the total container given a specific measurementId.");
+            System.err.println(e);
+        }
+        return count;
+    }
+
+    public static List<String[]> selectContainerEntries(String measurementId) {
+        List<String[]> containerEntries = new ArrayList<String[]>();
+        try (Connection conn = DriverManager.getConnection(JDBC_URL);
+            Statement stmt = conn.createStatement();) {
+            String selectIds = "SELECT * FROM " + TABLE_NAME_2 + " WHERE measurementId = " + measurementId;
+            try (ResultSet rs = stmt.executeQuery(selectIds);) {
+                while (rs.next()) {
+                    String[] entry = new String[5];
+                    int i = 0;
+                    entry[i++] = rs.getString("name");
+                    entry[i++] = rs.getString("containerId");
+                    entry[i++] = rs.getString("image");
+                    entry[i++] = rs.getString("dateCreated");
+                    entry[i++] = rs.getString("state");
+                    containerEntries.add(entry);
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[ERROR] Failed to select the container entries given a specific measurementId");
+            System.err.println(e);
+        }
+        return containerEntries;
+    }
+}
