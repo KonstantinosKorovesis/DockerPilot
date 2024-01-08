@@ -29,6 +29,7 @@ Now that the application is up and running, you can explore various functionalit
 -**sun_checks.xml:** This file is used for checking the format of the code 
 
 ## The UML Diagram of the program
+
 '''mermaid
 flowchart UML
     A[Main] --> B[DesktopApp];
