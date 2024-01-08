@@ -19,14 +19,14 @@ Now that the application is up and running, you can explore various functionalit
 
 ## The Repository Architecture
 
--**.github/workflows:**  This directory contains **CI_Test.yml** file for continuous integration
+- **.github/workflows:**  This directory contains **CI_Test.yml** file for continuous integration
 
--**src:** This is the first directory of the path that leads to code files (/src/main/java/gr/aueb/dmst
+- **src:** This is the first directory of the path that leads to code files (/src/main/java/gr/aueb/dmst
 /ProjectPr/), images files usefull for the GUI (src/main/resources/images) and test files of the code (src/test/java/gr/aueb/dmst/ProjectPr)
 
--**pom.xml:** This file contains project information like dependencies and build configuration
+- **pom.xml:** This file contains project information like dependencies and build configuration
 
--**sun_checks.xml:** This file is used for checking the format of the code 
+- **sun_checks.xml:** This file is used for checking the format of the code 
 
 ## The UML Diagram of the program
 ![uml_final_transparent](https://github.com/XaraKefala/ProjectPr/assets/147168589/636de377-d8aa-4f59-84b3-12d46427a8bc)
@@ -34,7 +34,7 @@ Now that the application is up and running, you can explore various functionalit
 
 ## The Data Structures and Algorithms used in the code
 **Data Structures:**
-For database, we used SQLite. We save the data of the docker containers in two SQLite tables (Table Names: Measurment, DockerInstance). In these two tables we save information like names and status of the containers, date of the measurements and other staff usefull for the user of the application.  
+For the Database, we used SQLite. We save the data of the Docker Containers in two SQLite tables (Table Names: Measurment, DockerInstance) which store information like names, status, creation date of the containers and other data useful in the application.  
 
 **Interfaces:**
 - List
