@@ -30,7 +30,7 @@ Now that the application is up and running, you can explore various functionalit
 
 ## The UML Diagram of the program
 '''mermaid
-UML Diagram DockerPilot
+flowchart UML
     A[Main] --> B[DesktopApp]
     B[DesktopApp] --> C[JFrame]
     B[DesktopApp] --> D[HTTPRequest]
