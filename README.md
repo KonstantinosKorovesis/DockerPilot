@@ -32,17 +32,17 @@ Now that the application is up and running, you can explore various functionalit
 
 
 ## The Data Structures and Algorithms used in the code
-**Data Structures: **
+**Data Structures:**
 For database, we used SQLite. We save the data of the docker containers in two SQLite tables (Table Names: Measurment, DockerInstance). In these two tables we save information like names and status of the containers, date of the measurements and other staff usefull for the user of the application.  
 
 **Interfaces:**
 - List
 - Map
-- Array**
+- Array
 
-**Implementations:
+**Implementations:**
 - ArrayList
-- LinkedHashMap**
+- LinkedHashMap
 
 ## Creators
 -**Kefala Charikleia Maria**
