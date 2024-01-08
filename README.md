@@ -31,21 +31,21 @@ Now that the application is up and running, you can explore various functionalit
 ## The UML Diagram of the program
 '''mermaid
 flowchart UML
-    A[Main] --> B[DesktopApp]
-    B[DesktopApp] --> C[JFrame]
-    B[DesktopApp] --> D[HTTPRequest]
-    B[DesktopApp] --> J[Executor]
-    B[DesktopApp] --> F[ImageModel]
-    B[DesktopApp] --> G[Database]
-    B[DesktopApp] --> I[Monitor]
-    B[DesktopApp] --> H[ContainerModel]
-    D[HTTPRequest] --> E[API]
-    E[API] --> G[Database]
-    E[API] --> J[Executor]
-    F[ImageModel] --> I[Monitor]
-    G[Database] --> I[Monitor]
-    G[Database] --> H[ContainerModel]
-    H[ContainerModel] --> I[Monitor]
+    A[Main] --> B[DesktopApp];
+    B[DesktopApp] --> C[JFrame];
+    B[DesktopApp] --> D[HTTPRequest];
+    B[DesktopApp] --> J[Executor];
+    B[DesktopApp] --> F[ImageModel;]
+    B[DesktopApp] --> G[Database];
+    B[DesktopApp] --> I[Monitor];
+    B[DesktopApp] --> H[ContainerModel];
+    D[HTTPRequest] --> E[API];
+    E[API] --> G[Database];
+    E[API] --> J[Executor];
+    F[ImageModel] --> I[Monitor];
+    G[Database] --> I[Monitor];
+    G[Database] --> H[ContainerModel];
+    H[ContainerModel] --> I[Monitor];
 '''
 
 ## The Data Structures and Algorithms used in the code
