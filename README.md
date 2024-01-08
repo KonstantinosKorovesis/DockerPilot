@@ -26,23 +26,23 @@ Now that the application is up and running, you can explore various functionalit
 
 -**pom.xml:** This file contains project information like dependencies and build configuration
 
--**sun_checks.xml** This file is used for checking the format of the code 
+-**sun_checks.xml:** This file is used for checking the format of the code 
 
 ## The UML Diagram of the program
 
 
 ## The Data Structures and Algorithms used in the code
-Data Structures:
+**Data Structures: **
 For database, we used SQLite. We save the data of the docker containers in two SQLite tables (Table Names: Measurment, DockerInstance). In these two tables we save information like names and status of the containers, date of the measurements and other staff usefull for the user of the application.  
 
-Interfaces:
--**List**
--**Map**
--**Array**
+**Interfaces:**
+- List
+- Map
+- Array**
 
-Implementations:
--**ArrayList**
--**LinkedHashMap**
+**Implementations:
+- ArrayList
+- LinkedHashMap**
 
 ## Creators
 -**Kefala Charikleia Maria**
