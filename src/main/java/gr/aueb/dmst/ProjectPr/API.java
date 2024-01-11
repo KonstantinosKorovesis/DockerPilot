@@ -4,8 +4,14 @@ import java.util.List;
 import com.google.gson.Gson;
 import static spark.Spark.*;
 
+/** The API Class which handles the creation of the API server and sets up the required routes using Spark.
+ * @see spark.Spark
+*/
 public class API {
-    public static void start() {      
+    /** Starts the API server.
+     * Sets the port to 8080, initializes the server and creates the requires routes.
+     */
+    public static void start() {
         port(8080); //http://localhost:8080
         initExceptionHandler((e) -> System.err.println("[ERROR API] Something went wrong when initializing the server."));
         init();
@@ -69,6 +75,7 @@ public class API {
         });
     }
 
+    /** Disconnects the API server. */
     public static void stop() {
         System.out.println("Server is closing...");
         spark.Spark.stop();

@@ -6,13 +6,19 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
 import java.util.ArrayList;
-
 import java.lang.reflect.Type;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.Gson;
 
+/** The HTTPRequest Class which handles the HTTP POST and GET Requests to the API server. */
 public class HTTPRequest {
-    private static final String baseUrl = "http://localhost:8080";
+    /** The URL of the API server. */
+    protected static final String baseUrl = "http://localhost:8080";
+
+    /** Sends a POST Request to the server's stop_container route with the given container_id as a paremeter.
+     *
+     * @param container_id The passed container_id to be stopped.
+     */
     public static void stop_container(String container_id) {
         try {
             String endpoint = "/stop_container?container_id=" + container_id;
@@ -41,6 +47,10 @@ public class HTTPRequest {
         }
     }
 
+    /** Sends a POST Request to the server's start_container route with the given container_id as a paremeter.
+     *
+     * @param container_id The passed container_id to be started.
+     */
     public static void start_container(String container_id) {
         try {
             String endpoint = "/start_container?container_id=" + container_id;
@@ -69,6 +79,11 @@ public class HTTPRequest {
         }
     }
 
+    /** Sends a GET Request to the server's running_container_count route with the given measurementId as a paremeter.
+     *
+     * @param measurementId The passed measurementId specifying the set of entries to be included in the count.
+     * @return The count of the running containers out of the total number of containers for the specific measurementId.
+     */
     public static int running_container_count(String measurementId) {
         try {
             String endpoint = "/running_container_count?measurementId=" + measurementId;
@@ -99,6 +114,11 @@ public class HTTPRequest {
         return 0;
     }
 
+    /** Sends a GET Request to the server's all_container_count route with the given measurementId as a paremeter.
+     *
+     * @param measurementId The passed measurementId specifying the set of entries to be included in the count.
+     * @return The total number of available containers for the specific measurementId.
+     */
     public static int all_container_count(String measurementId) {
         try {
             String endpoint = "/all_container_count?measurementId=" + measurementId;
@@ -129,6 +149,10 @@ public class HTTPRequest {
         return 0;
     }
 
+    /** Sends a GET Request to the server's available_dates.
+     *
+     * @return A String[] of all the available dates in the database.
+     */
     public static String[] available_dates() {
         try {
             String endpoint = "/available_dates";
@@ -161,6 +185,11 @@ public class HTTPRequest {
         return new String[0];
     }
 
+    /** Sends a GET Request to the server's available_dates with the given date as a parameter.
+     *
+     * @param date The passed date specifying which entries are to be included.
+     * @return A String[] of all the available measurements in the database on the specific passed date.
+     */
     public static String[] available_measurements(String date) {
         try {
             String endpoint = "/available_measurements?date=" + date;
@@ -193,6 +222,11 @@ public class HTTPRequest {
         return new String[0];
     }
 
+    /** Sends a GET Request to the server's container_entries with the given measurementId as a parameter.
+     *
+     * @param measurementId The passed measurementId which points to a specific set of entries.
+     * @return A {@link List} of String[] arrays, with each one containing the data of a single container from the specific measurement.
+     */
     public static List<String[]> container_entries(String measurementId) {
         List<String[]> containerEntries = new ArrayList<String[]>();
         try {

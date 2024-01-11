@@ -13,18 +13,32 @@ import java.awt.Dialog.ModalityType;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+/** The DesktopApp Class which extends the JFrame Class and handles the display and usability of the desktop application. */
 public class DesktopApp extends JFrame {
-    private static final String[] containerDataColumnNames = {"Name", "ID", "Image", "Date Created", "State"};
-    private static final String[] imageDataColumnNames = {"Name", "ID", "Size", "Container No."};
-    private static final String[] COMBO_BOX_OPTIONS = {"All", "Active Only", "Inactive Only"};
-    private static final Color START_COLOR = new Color(34,61,254);
-    private static final int FRAME_WIDTH = 800;
-    private static final int FRAME_HEIGHT = 600;
-    private static final int BUTTON_WIDTH = 100;
-    private static final int BUTTON_HEIGHT = 30;
-    private static final int ROW_HEIGHT = 20;
-    private static final int FONT_SIZE = 16;
-    private static final Font FONT = new Font("Arial", Font.PLAIN, FONT_SIZE);
+    /** The Column Names of the table on the Containers Tab. */
+    public static final String[] containerDataColumnNames = {"Name", "ID", "Image", "Date Created", "State"};
+    /** The Column Names of the table on the Images Tab. */
+    public static final String[] imageDataColumnNames = {"Name", "ID", "Size", "Container No."};
+    /** The available Combo Box Options in the Containers Tab. */
+    public static final String[] COMBO_BOX_OPTIONS = {"All", "Active Only", "Inactive Only"};
+    /** The color of the application image. */
+    public static final Color START_COLOR = new Color(34, 61, 254);
+    /** The Width of the Window Frame. */
+    public static final int FRAME_WIDTH = 800;
+    /** The Height of the Window Frame. */
+    public static final int FRAME_HEIGHT = 600;
+    /** The Button Width used for small buttons. Large buttons have double this Width. */
+    public static final int BUTTON_WIDTH = 100;
+    /** The Button Height used for all buttons. */
+    public static final int BUTTON_HEIGHT = 30;
+    /** The Row Height of the tables in all tabs. */
+    public static final int ROW_HEIGHT = 20;
+    /** The size of the font used throughout the app. */
+    public static final int FONT_SIZE = 16;
+    /** The font used throughout the app. */
+    public static final Font FONT = new Font("Arial", Font.PLAIN, FONT_SIZE);
+
+    //Lists, Components and boolean Variables which are needed and used in multiple methods within the Class.
     private JPanel startPanel = new JPanel(new GridBagLayout());
     private JProgressBar progressBar = new JProgressBar();
     private JTabbedPane tabbedPane = new JTabbedPane();
@@ -36,6 +50,7 @@ public class DesktopApp extends JFrame {
     private boolean imageTabTipShown = false;
     private boolean createMeasurementTipShown = false;
 
+    /** Creates an the empty default initial window. */
     public DesktopApp() {
         ImageIcon icon = new ImageIcon(getClass().getResource("/images/icon.png"));
         setIconImage(icon.getImage());
@@ -45,8 +60,88 @@ public class DesktopApp extends JFrame {
         pack();
         setVisible(true);
     }
-    
-    private JPanel getContainersPanel() {
+
+    /** Method which handles the application's starting screen.
+     * Gets and displays the application image from the resources file and creates a JProgressBar.
+     */
+    public void openStartScreen() {
+        startPanel.setBackground(START_COLOR);
+
+        ImageIcon originalIcon = new ImageIcon(getClass().getResource("/images/start_image.png"));
+        java.awt.Image originalImage = originalIcon.getImage();
+        java.awt.Image scaledImage = originalImage.getScaledInstance(750, 562, java.awt.Image.SCALE_SMOOTH);
+        ImageIcon scaledIcon = new ImageIcon(scaledImage);
+
+        JLabel logoLabel = new JLabel(scaledIcon);
+
+        progressBar.setPreferredSize(new Dimension(600, progressBar.getPreferredSize().height));
+        progressBar.setUI(new BasicProgressBarUI() {
+            @Override
+            protected void paintDeterminate(Graphics g, JComponent c) {
+                JProgressBar pBar = (JProgressBar) c;
+                int min = pBar.getMinimum();
+                int max = pBar.getMaximum();
+                int value = pBar.getValue();
+
+                double percent = (double) (value - min) / (max - min);
+
+                Rectangle bar = getBounds();
+                g.setColor(Color.WHITE);
+                g.fillRect(bar.x, bar.y, bar.width, bar.height);
+
+                int progress = (int) (bar.width * percent);
+                g.setColor(START_COLOR);
+                g.fillRect(bar.x, bar.y, progress, bar.height);
+            }
+        });
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(-150, 0, 0, 0);
+        gbc.anchor = GridBagConstraints.PAGE_START;
+        startPanel.add(logoLabel, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbc.insets = new Insets(0, 0, 0, 0);
+        gbc.anchor = GridBagConstraints.CENTER;
+        startPanel.add(progressBar, gbc);
+
+
+        add(startPanel);
+        revalidate();
+        repaint();
+    }
+
+    /** Method for setting the JProgressBar's progress outside the DesktopApp Class.
+     *
+     * @param progress The progress int value from 0 to 100.
+     */
+    public void setProgress(int progress) {
+        progressBar.setValue(progress);
+    }
+
+    /** Method which handles the set up of main application.
+     * Gets and adds the three main tabs to the frame.
+     */
+    public void openMainApplication() {
+        remove(startPanel);
+
+        tabbedPane.addTab("Containers", getContainersPanel());
+        tabbedPane.addTab("Images", getImagesPanel());
+        tabbedPane.addTab("Container History", getContainerHistoryPanel());
+
+        add(tabbedPane);
+        revalidate();
+        repaint();
+    }
+
+    /** Method for creating and getting the Containers Tab Panel.
+     *
+     * @return The JPanel of the Containers Tab.
+     */
+    protected JPanel getContainersPanel() {
         containerTabDefaultTableModel = new DefaultTableModel() {
             @Override
             public int getColumnCount() {
@@ -75,7 +170,7 @@ public class DesktopApp extends JFrame {
         containerTabDropDownBox = new JComboBox<>(COMBO_BOX_OPTIONS);
         containerTabDropDownBox.setPreferredSize(new Dimension(BUTTON_WIDTH, BUTTON_HEIGHT));
         containerTabDropDownBox.setSelectedItem(COMBO_BOX_OPTIONS[0]);
-        containerTabDropDownBox.addActionListener(new ActionListener () {
+        containerTabDropDownBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 updateContainerTableModel(String.valueOf(containerTabDropDownBox.getSelectedItem()));
@@ -144,11 +239,11 @@ public class DesktopApp extends JFrame {
                 }
             }
         });
-        
-        JButton histogramButton = new JButton("Create Measurement");
-        histogramButton.setPreferredSize(new Dimension(BUTTON_WIDTH * 2, BUTTON_HEIGHT));
-        histogramButton.setBackground(Color.BLUE);
-        histogramButton.addActionListener(new ActionListener() {
+
+        JButton createMeasurementButton = new JButton("Create Measurement");
+        createMeasurementButton.setPreferredSize(new Dimension(BUTTON_WIDTH * 2, BUTTON_HEIGHT));
+        createMeasurementButton.setBackground(Color.BLUE);
+        createMeasurementButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (Database.setUpComplete) {
@@ -169,12 +264,12 @@ public class DesktopApp extends JFrame {
         buttonAndComboBoxPanel.add(stopButton);
         buttonAndComboBoxPanel.add(inspectButton);
         buttonAndComboBoxPanel.add(containerTabDropDownBox);
-        JPanel histogramPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        histogramPanel.add(histogramButton);
+        JPanel createMeasurementPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        createMeasurementPanel.add(createMeasurementButton);
 
         JPanel southPanel = new JPanel(new BorderLayout());
         southPanel.add(buttonAndComboBoxPanel, BorderLayout.WEST);
-        southPanel.add(histogramPanel, BorderLayout.EAST);
+        southPanel.add(createMeasurementPanel, BorderLayout.EAST);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(scrollPane, BorderLayout.CENTER);
@@ -182,11 +277,15 @@ public class DesktopApp extends JFrame {
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
 
         updateContainerTableModel(String.valueOf(containerTabDropDownBox.getSelectedItem()));
-        
+
         return mainPanel;
     }
 
-    private JPanel getImagesPanel() {
+    /** Method for creating and getting the Images Tab Panel.
+     *
+     * @return The JPanel of the Images Tab.
+     */
+    protected JPanel getImagesPanel() {
         DefaultTableModel tableModel = new DefaultTableModel() {
             @Override
             public int getColumnCount() {
@@ -256,12 +355,9 @@ public class DesktopApp extends JFrame {
         JPanel bottomLeftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         bottomLeftPanel.add(createButton);
         bottomLeftPanel.add(inspectButton);
-        //JPanel bottomRightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        //bottomRightPanel.add(downloadButton);
 
         JPanel southPanel = new JPanel(new BorderLayout());
         southPanel.add(bottomLeftPanel, BorderLayout.WEST);
-        //southPanel.add(bottomRightPanel, BorderLayout.EAST);
 
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.add(scrollPane, BorderLayout.CENTER);
@@ -273,7 +369,11 @@ public class DesktopApp extends JFrame {
         return mainPanel;
     }
 
-    private JPanel getContainerHistoryPanel() {
+    /** Method for creating and getting the Container History Tab Panel.
+     *
+     * @return The JPanel of the Container History Tab.
+     */
+    protected JPanel getContainerHistoryPanel() {
         DefaultTableModel tableModel = new DefaultTableModel() {
             @Override
             public int getColumnCount() {
@@ -298,14 +398,14 @@ public class DesktopApp extends JFrame {
 
         JScrollPane scrollPane = new JScrollPane(mainTable);
         JScrollBar verticalScrollBar = scrollPane.getVerticalScrollBar();
-        
+
         JLabel dateInfoLabel = new JLabel("Measurement Date: -");
         dateInfoLabel.setForeground(Color.BLACK);
         JLabel idInfoLabel = new JLabel("Measurement ID: -");
         idInfoLabel.setForeground(Color.BLACK);
         JLabel containerInfoLabel = new JLabel("Running Containers: -");
         containerInfoLabel.setForeground(Color.BLACK);
-        
+
         JButton chooseButton = new JButton("Choose Measurement");
         chooseButton.setPreferredSize(new Dimension(BUTTON_WIDTH * 2, BUTTON_HEIGHT));
         chooseButton.setBackground(Color.BLUE);
@@ -326,7 +426,7 @@ public class DesktopApp extends JFrame {
         bottomRightPanel.add(dateInfoLabel);
         bottomRightPanel.add(idInfoLabel);
         bottomRightPanel.add(containerInfoLabel);
-        
+
         JPanel southPanel = new JPanel(new BorderLayout());
         southPanel.add(bottomLeftPanel, BorderLayout.WEST);
         southPanel.add(bottomRightPanel, BorderLayout.EAST);
@@ -339,9 +439,13 @@ public class DesktopApp extends JFrame {
         return mainPanel;
     }
 
-    private void openInspectContainerDialog(String containerID) {
+    /** Displays a JDialog containing a JPanel of all available data on the specified Image.
+     *
+     * @param containerID The containerID String of the specified Container.
+     */
+    protected void openInspectContainerDialog(String containerID) {
         Map<String, String> containerMap = ContainerModel.getContainerDataMap(containerID);
-        
+
         JPanel dialogPanel = new JPanel(new GridLayout(containerMap.size(), 1, 10, 10));
         dialogPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         dialogPanel.setFont(FONT);
@@ -358,9 +462,13 @@ public class DesktopApp extends JFrame {
         inspectDialog.setVisible(true);
     }
 
-    private void openInspectImageDialog(String imageID) {
+    /** Displays a JDialog containing a JPanel of all available data on the specified Image.
+     *
+     * @param imageID The imageID String of the specified Image.
+     */
+    protected void openInspectImageDialog(String imageID) {
         Map<String, String> imageMap = ImageModel.getImageDataMap(imageID);
-        
+
         JPanel dialogPanel = new JPanel(new GridLayout(imageMap.size(), 1, 10, 10));
         dialogPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         dialogPanel.setFont(FONT);
@@ -377,7 +485,11 @@ public class DesktopApp extends JFrame {
         inspectDialog.setVisible(true);
     }
 
-    private void openCreateContainerDialog(String imageName) {
+    /** Displays a JDialog for getting the users input regarding the creation of a new Container.
+     *
+     * @param imageName The Name of the specified Image to be used for the new Container..
+     */
+    protected void openCreateContainerDialog(String imageName) {
         JTextField inputNameField = new JTextField(3);
         JCheckBox checkBox = new JCheckBox("Use Default Container Name");
         checkBox.addActionListener(new ActionListener() {
@@ -390,7 +502,7 @@ public class DesktopApp extends JFrame {
                 }
             }
         });
-        
+
         JPanel dialogPanel = new JPanel(new GridLayout(3, 3, 20, 5));
         dialogPanel.add(new JLabel("New Container Image:"));
         dialogPanel.add(new JLabel(imageName + ":latest"));
@@ -400,7 +512,6 @@ public class DesktopApp extends JFrame {
         dialogPanel.add(Box.createRigidArea(new Dimension(0, 0)));
 
         int option = JOptionPane.showConfirmDialog(this, dialogPanel, "Create New Container", JOptionPane.OK_CANCEL_OPTION);
-        
         if (option == JOptionPane.OK_OPTION) {
             if (checkBox.isSelected()) {
                 String result = Executor.createContainer(imageName);
@@ -412,7 +523,11 @@ public class DesktopApp extends JFrame {
         }
     }
 
-    private String[] openMeasurementInputDialog() {
+    /** Displays a JDialog for getting the users input regarding which Measurement they want to select and display.
+     *
+     * @return A String[] array with two String items: the user selected Data and Measurement from the ones available in the Database.
+     */
+    protected String[] openMeasurementInputDialog() {
         String[] dates = HTTPRequest.available_dates();
         if (dates.length == 0) {
             displayMessage("You must Create a Measurement in the Containers tab first.");
@@ -420,7 +535,7 @@ public class DesktopApp extends JFrame {
         }
         JComboBox<String> dateComboBox = new JComboBox<>(dates);
         dateComboBox.setSelectedIndex(dates.length - 1);
-        
+
         String[] measurements = HTTPRequest.available_measurements(dates[dates.length - 1]);
         String[] measurementOptions = new String[measurements.length];
         for (int i = 0; i < measurementOptions.length; i++) {
@@ -454,7 +569,6 @@ public class DesktopApp extends JFrame {
         dialogPanel.add(measurementComboBox);
 
         int option = JOptionPane.showConfirmDialog(this, dialogPanel, "Select A Specific Measurement", JOptionPane.OK_CANCEL_OPTION);
-        
         if (option == JOptionPane.OK_OPTION) {
             String selectedDate = (String) dateComboBox.getSelectedItem();
             String selectedMeasurement = HTTPRequest.available_measurements(selectedDate)[measurementComboBox.getSelectedIndex()];
@@ -465,7 +579,12 @@ public class DesktopApp extends JFrame {
         }
     }
 
-    private List<String[]> getContainerTableItems(String selectedOption) {
+    /** Method used by the updateContainerTableModel method for getting the required items for the Containers Tab Table.
+     *
+     * @param selectedOption The user selected Combo Box Option.
+     * @return A List<String[]>, with each String[] representing a single row.
+     */
+    protected List<String[]> getContainerTableItems(String selectedOption) {
         tableItems.clear();
         int i = 0;
         if (selectedOption.equals(COMBO_BOX_OPTIONS[0])) {
@@ -508,7 +627,11 @@ public class DesktopApp extends JFrame {
         return tableItems;
     }
 
-    private void updateContainerTableModel(String selectedOption) {
+    /** Method for updating the Containers Tab Table.
+     *
+     * @param selectedOption The user selected Combo Box Option.
+     */
+    protected void updateContainerTableModel(String selectedOption) {
         while (containerTabDefaultTableModel.getRowCount() > 0) {
             containerTabDefaultTableModel.removeRow(0);
         }
@@ -517,7 +640,11 @@ public class DesktopApp extends JFrame {
         }
     }
 
-    private List<String[]> getImageTableItems() {
+    /** Method used by the updateImageTableModel method for getting the required items for the Images Tab Table.
+     *
+     * @return A List<String[]>, with each String[] representing a single row.
+     */
+    protected List<String[]> getImageTableItems() {
         tableItems.clear();
         int i = 0;
         for (Image image : Monitor.getImages()) {
@@ -533,7 +660,11 @@ public class DesktopApp extends JFrame {
         return tableItems;
     }
 
-    private void updateImageTableModel(DefaultTableModel tableModel) {
+    /** Method for updating the Images Tab Table.
+     *
+     * @param tableModel The DefaultTableModel of the Images Tab Table.
+     */
+    protected void updateImageTableModel(DefaultTableModel tableModel) {
         while (tableModel.getRowCount() > 0) {
             tableModel.removeRow(0);
         }
@@ -542,14 +673,28 @@ public class DesktopApp extends JFrame {
         }
     }
 
-    private List<String[]> getContainerHistoryItems(String[] options) {
+    /** Method used by the updateContainerHistoryTable method for getting the required items for the Container History Tab Table.
+     *
+     * @param options The user selected Date and Measurement ID from the JDialog.
+     * @return A List<String[]>, with each String[] representing a single row.
+     */
+    protected List<String[]> getContainerHistoryItems(String[] options) {
         tableItems.clear();
         String selectedMeasurement = options[1];
         tableItems = HTTPRequest.container_entries(selectedMeasurement);
         return tableItems;
     }
 
-    private void updateContainerHistoryTable(DefaultTableModel tableModel,
+    /** Method for updating the Container History Tab.
+     * Updates the main Table and the Info JLabels using the passed options String[] array.
+     *
+     * @param tableModel The DefaultTableModel of the Container History Tab Table.
+     * @param dateInfoLabel The JLabel with the selected Date.
+     * @param idInfoLabel The JLabel with the selected Measurement ID.
+     * @param containerInfoLabel The JLabel with the info regarding running and total Containers.
+     * @param options The user selected Date and Measurement ID from the JDialog.
+     */
+    protected void updateContainerHistoryTable(DefaultTableModel tableModel,
                                             JLabel dateInfoLabel, JLabel idInfoLabel, JLabel containerInfoLabel,
                                             String[] options) {
         while (tableModel.getRowCount() > 0) {
@@ -561,82 +706,24 @@ public class DesktopApp extends JFrame {
 
         dateInfoLabel.setText("Measurement Date: " + options[0]);
         idInfoLabel.setText("Measurement ID: " + options[1]);
-        String containerInfoText = String.format("Running Containers: %s / %s", 
+        String containerInfoText = String.format("Running Containers: %s / %s",
             HTTPRequest.running_container_count(options[1]), HTTPRequest.all_container_count(options[1]));
         containerInfoLabel.setText(containerInfoText);
     }
 
-    private void moveToTop(JScrollBar verticalScrollBar) {
+    /** Method for moving the passed vertical JScrollBar to the very top.
+     *
+     * @param verticalScrollBar The passed JScrollBar.
+     */
+    protected void moveToTop(JScrollBar verticalScrollBar) {
         verticalScrollBar.setValue(verticalScrollBar.getMinimum());
     }
 
-    private void displayMessage(String message) {
+    /** Method which uses the JOptionPane Class to display messages to the user.
+     *
+     * @param message The message String to be displayed.
+     */
+    protected void displayMessage(String message) {
         JOptionPane.showMessageDialog(this, message);
-    }
-
-    public void openStartScreen() {
-        startPanel.setBackground(START_COLOR);
-
-        ImageIcon originalIcon = new ImageIcon(getClass().getResource("/images/start_image.png"));
-        java.awt.Image originalImage = originalIcon.getImage();
-        java.awt.Image scaledImage = originalImage.getScaledInstance(750, 562, java.awt.Image.SCALE_SMOOTH);
-        ImageIcon scaledIcon = new ImageIcon(scaledImage);
-
-        JLabel logoLabel = new JLabel(scaledIcon);
-
-        progressBar.setPreferredSize(new Dimension(600, progressBar.getPreferredSize().height));
-        progressBar.setUI(new BasicProgressBarUI() {
-            @Override
-            protected void paintDeterminate(Graphics g, JComponent c) {
-                JProgressBar progressBar = (JProgressBar) c;
-                int min = progressBar.getMinimum();
-                int max = progressBar.getMaximum();
-                int value = progressBar.getValue();
-
-                double percent = (double) (value - min) / (max - min);
-
-                Rectangle bar = getBounds();
-                g.setColor(Color.WHITE);
-                g.fillRect(bar.x, bar.y, bar.width, bar.height);
-
-                int progress = (int) (bar.width * percent);
-                g.setColor(START_COLOR);
-                g.fillRect(bar.x, bar.y, progress, bar.height);
-            }
-        });
-
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.insets = new Insets(-150, 0, 0, 0);
-        gbc.anchor = GridBagConstraints.PAGE_START;
-        startPanel.add(logoLabel, gbc);
-
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.insets = new Insets(0, 0, 0, 0);
-        gbc.anchor = GridBagConstraints.CENTER;
-        startPanel.add(progressBar, gbc);
-
-
-        add(startPanel);
-        revalidate();
-        repaint();
-    }
-
-    public void setProgress(int progress) {
-        progressBar.setValue(progress);
-    }
-
-    public void openMainApplication() {
-        remove(startPanel);
-
-        tabbedPane.addTab("Containers", getContainersPanel());
-        tabbedPane.addTab("Images", getImagesPanel());
-        tabbedPane.addTab("Container History", getContainerHistoryPanel());
-
-        add(tabbedPane);
-        revalidate();
-        repaint();
     }
 }

@@ -4,10 +4,8 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowAdapter;
 import java.io.IOException;
 import java.time.Duration;
-
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientConfig;
@@ -88,7 +86,12 @@ public class Main {
         }
     }
 
-    private static DockerClient getDockerClient() throws RuntimeException {
+    /** Method that sets up and returns the dockerClient for executing the various Docker commands.
+     *
+     * @return The {@link DockerClient} dockerClient object.
+     * @throws RuntimeException if setting up the dockerClient is unsuccessful
+     */
+    protected static DockerClient getDockerClient() throws RuntimeException {
         //set up and configure the dockerClient used for executing Docker commands.
         DockerClientConfig config = null;
         DockerHttpClient httpClient = null;

@@ -11,17 +11,34 @@ import java.util.List;
 import java.util.ArrayList;
 import com.github.dockerjava.api.model.Container;
 
+/** The Database Class.
+ * Handles:
+ *  the creation of the application files Directory, the Database file and the the required Tables.
+ *  the insert and select commands on the Database files.
+ */
 public class Database {
-    //set app directory name and location, set database name
+    /** A boolean only set to true if the set up of the Database is successfully completed or was completed in the past. */
     public static boolean setUpComplete = false;
+    /** The name of the directory of the application files. */
     public static final String APP_DIRECTORY_NAME = ".dockerpilot";
+    /** The path of the directory of the application files. */
     public static final String APP_DIRECTORY_PATH = System.getProperty("user.home") + File.separator + APP_DIRECTORY_NAME;
+    /** The name of the database file. */
     public static final String DATABASE_NAME = "database" + ".db";
+    /** The path to the database file. */
     public static final String DATABASE_PATH = APP_DIRECTORY_PATH + File.separator + DATABASE_NAME;
+    /** The name of the Measurement table. */
     public static final String TABLE_NAME_1 = "MEASUREMENT";
+    /** The name of the table with the Container entries. */
     public static final String TABLE_NAME_2 = "CONTAINER";
+    /** The URL for Java Database Connectivity which is used to access and execute SQLite commands/queries on the database. */
     public static final String JDBC_URL = "jdbc:sqlite:" + DATABASE_PATH;
-    
+
+    /** Attempts to create the application files Directory, the Database file and the Tables inside the Database.
+     * Sets the setUpComplete boolean class variable to true if:
+     *  the attempt is successful or
+     *  the directory, database and tables already exist.
+     */
     public static void setUpDatabase() {
         if (createDirectory()) {
             if (createDatabase()) {
@@ -31,10 +48,12 @@ public class Database {
             }
         }
     }
+
+    /** Method that handles the creation of the application files Directory.
+     *
+     * @return True if the directory already exists or was successfully created, false otherwise.
+     */
     public static boolean createDirectory() {
-        //check if the directory exists in the given path and if not, create it
-        //true: directory was created or it already exists
-        //false: failed to create directory
         File directoryFile = new File(APP_DIRECTORY_PATH);
         if (!directoryFile.exists()) {
             boolean created = directoryFile.mkdir();
@@ -50,11 +69,12 @@ public class Database {
             return true;
         }
     }
+
+    /** Method that handles the creation of the Database file.
+     *
+     * @return True if the database file already exists or was successfully created, false otherwise.
+     */
     public static boolean createDatabase() {
-        //create a database inside the given file path
-        //if the database already exists, do nothing
-        //true: database was created or already exists
-        //false: failed to create the database
         File databaseFile = new File(DATABASE_PATH);
         if (!databaseFile.exists()) {
             try (Connection conn = DriverManager.getConnection(JDBC_URL);) {
@@ -74,10 +94,12 @@ public class Database {
             return true;
         }
     }
+
+    /** Method that handles the creation of Tables inside the Database file.
+     *
+     * @return True if the tables already exist or were successfully created, false otherwise.
+     */
     public static boolean createTables() {
-        //creates the two tables
-        //true: tables have been created or already exist
-        //false: failed to create the tables
         String createTableContainerPack = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME_1 + " (\n"
                             + "	measurementId       INTEGER PRIMARY KEY AUTOINCREMENT,\n"
                             + "	measurementDate     DATE NOT NULL\n"
@@ -105,13 +127,17 @@ public class Database {
             return false;
         }
     }
-    //creates a new entry in the first table and returns the measurementId of the entry
+
+    /** Method for inserting a new Measurement entry into the Measurement Table.
+     *
+     * @return The integer value of the measurementId of the entry.
+     */
     public static int insertMeasurement() {
-        String sqlInsert = "INSERT INTO " + TABLE_NAME_1 + "(measurementDate) VALUES(DATE(\"now\"))"; //yyyy-MM-dd
+        String sqlInsert = "INSERT INTO " + TABLE_NAME_1 + "(measurementDate) VALUES(DATE(\"now\"))";
         try (Connection conn = DriverManager.getConnection(JDBC_URL);
             Statement stmt = conn.createStatement();) {
             stmt.executeUpdate(sqlInsert);
-            //get and return number of current measurement
+
             String selectLastInsertedPackId = "SELECT * FROM " + TABLE_NAME_1 + " WHERE measurementId = last_insert_rowid()";
             try (ResultSet rs = stmt.executeQuery(selectLastInsertedPackId);) {
                 int measurementId = rs.getInt("measurementId");
@@ -123,13 +149,17 @@ public class Database {
         }
         return -1;
     }
-    //creates a new entry for each of the existing containers and records their data at that time
+
+    /** Method for inserting the Container entries into the Container Table.
+     *
+     * @param measurementId The integer value of the measurementId from the corresponding Measurement Table entry.
+     */
     public static void insertContainers(int measurementId) {
         List<Container> containers = Monitor.getAllContainers();
         for (Container container : containers) {
             String[] row = ContainerModel.getContainerEntry(container);
-            String sqlInsert = "INSERT INTO " + TABLE_NAME_2 +
-                "(containerId, image, name, dateCreated, state, measurementId) VALUES (?,?,?,?,?,?)";
+            String sqlInsert = "INSERT INTO " + TABLE_NAME_2
+                + "(containerId, image, name, dateCreated, state, measurementId) VALUES (?,?,?,?,?,?)";
             try (Connection conn = DriverManager.getConnection(JDBC_URL);
                 PreparedStatement pstmt = conn.prepareStatement(sqlInsert);) {
                 int i = 0;
@@ -147,7 +177,10 @@ public class Database {
         }
     }
 
-    //SELECTS
+    /** Method for selecting all dates with available Measurements from the database.
+     *
+     * @return A String[] of all the dates in yyyy-MM-dd format.
+     */
     public static String[] selectAllDates() {
         List<String> datesList = new ArrayList<String>();
         try (Connection conn = DriverManager.getConnection(JDBC_URL);
@@ -166,6 +199,11 @@ public class Database {
         return s;
     }
 
+    /** Method for selecting all the measurementId integer values from the Measurement table based on a specific date.
+     *
+     * @param date The given date String.
+     * @return A String[] of all the measurementId integer values from the Measurement Table.
+     */
     public static String[] selectMeasurementIdsOnDate(String date) {
         List<String> idList = new ArrayList<String>();
         try (Connection conn = DriverManager.getConnection(JDBC_URL);
@@ -185,6 +223,12 @@ public class Database {
         return s;
     }
 
+    /** Method for returning the count of the running containers from the Container table based on a specific measurementId
+     * from the Measurement table.
+     *
+     * @param measurementId The given measurementId String from the Measurement table.
+     * @return An integer value of how many containers were running on the specific measurement.
+     */
     public static int selectRunningContainerCount(String measurementId) {
         int count = 0;
         try (Connection conn = DriverManager.getConnection(JDBC_URL);
@@ -201,6 +245,12 @@ public class Database {
         return count;
     }
 
+    /** Method for returning the count of the total containers from the Container table based on a specific measurementId
+     * from the Measurement table.
+     *
+     * @param measurementId The given measurementId String from the Measurement table.
+     * @return An integer value of how many containers existed on the specific measurement.
+     */
     public static int selectTotalContainerCount(String measurementId) {
         int count = 0;
         try (Connection conn = DriverManager.getConnection(JDBC_URL);
@@ -217,6 +267,12 @@ public class Database {
         return count;
     }
 
+    /** Method for selecting the whole entries from the Container table based on a specific measurementId from the
+     * Measurement table.
+     *
+     * @param measurementId The given measurementId String from the Measurement table.
+     * @return A {@link List} of String[] objects, with each String[] array containing the values of a single entry.
+     */
     public static List<String[]> selectContainerEntries(String measurementId) {
         List<String[]> containerEntries = new ArrayList<String[]>();
         try (Connection conn = DriverManager.getConnection(JDBC_URL);

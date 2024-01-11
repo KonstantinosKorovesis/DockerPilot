@@ -9,8 +9,9 @@ import com.github.dockerjava.api.DockerClient;
 /** The Monitor Thread Class. */
 public final class Monitor {
     /** The {@link DockerClient} object used for executing Docker commands in the Monitor Thread. */
-    private static DockerClient dockerClient;
+    protected static DockerClient dockerClient;
 
+    /** Constructor not meant to be used, only added for clarification. */
     private Monitor() {
         throw new UnsupportedOperationException(
         "The Monitor Thread is a utility class and cannot be instantiated.");

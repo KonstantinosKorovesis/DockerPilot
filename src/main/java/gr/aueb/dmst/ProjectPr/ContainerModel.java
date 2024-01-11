@@ -3,23 +3,27 @@ package gr.aueb.dmst.ProjectPr;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
 import com.github.dockerjava.api.model.Image;
 import com.github.dockerjava.api.model.Container;
 
 /** The Container Model Class
- * used for getting and displaying information regarding Container objects.
+ * used for getting information regarding Container objects.
  * @see Container
  */
 public class ContainerModel {
+    /** Constructor not meant to be used, only added for clarification. */
+    private ContainerModel() {
+        throw new UnsupportedOperationException(
+        "The ContainerModel Class is a utility class and cannot be instantiated.");
+    }
+
     protected static String getName(Container container) {
         String name = (container.getNames()[0]).split("/")[1];
         return name;
     }
-    
+
     protected static String getID(Container container) {
         String id = container.getId();
         return id;
@@ -91,7 +95,7 @@ public class ContainerModel {
 
     /** Method that is used to get the data needed in the SQLite Database table about the given Container.
      *
-     * @param container The passed Container.
+     * @param container The passed Container object.
      * @return A String Array with the Container data needed for the Database entry.
      */
     public static String[] getContainerEntry(Container container) {
@@ -105,6 +109,13 @@ public class ContainerModel {
         return entry;
     }
 
+    /** Method that creates and returns a Map containing all the available information of a given Container.
+     *
+     * @param container The passed Container object.
+     * @return A {@link Map} with String key and value parameters.
+     * The following keys correspond to data related to the passed Container.
+     * ID, ID_12, Image, ImageID, Labels, Name, Date Created, Time Created, Status, State
+     */
     public static Map<String, String> getContainerDataMap(Container container) {
         Map<String, String> containerMap = new LinkedHashMap<>();
         containerMap.put("ID", ContainerModel.getID(container));
@@ -120,8 +131,15 @@ public class ContainerModel {
         return containerMap;
     }
 
+    /** Method that creates and returns a Map containing all the available information of a Container given its ID.
+     *
+     * @param containerID The passed Container ID.
+     * @return A {@link Map} with String key and value parameters.
+     * The following keys correspond to data related to the Container:
+     * ID, ID_12, Image, ImageID, Labels, Name, Date Created, Time Created, Status, State
+     */
     public static Map<String, String> getContainerDataMap(String containerID) {
-        Map<String, String> containerMap = new HashMap<>();
+        Map<String, String> containerMap = new LinkedHashMap<>();
         for (Container container : Monitor.getAllContainers()) {
             if (ContainerModel.getID(container).equals(containerID) || ContainerModel.getID(container).startsWith(containerID)) {
                 containerMap = getContainerDataMap(container);

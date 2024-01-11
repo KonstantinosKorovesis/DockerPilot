@@ -8,11 +8,12 @@ import com.github.dockerjava.api.exception.ConflictException;
 /** The Executor Thread Class. */
 public final class Executor {
     /** The {@link DockerClient} object used for executing Docker commands in the Executor Thread. */
-    private static DockerClient dockerClient;
+    protected static DockerClient dockerClient;
 
+    /** Constructor not meant to be used, only added for clarification. */
     private Executor() {
         throw new UnsupportedOperationException(
-        "The Monitor Thread is a utility class and cannot be instantiated.");
+        "The Executor Thread is a utility class and cannot be instantiated.");
     }
 
     /** Method that is used before interacting with Containers.
@@ -40,7 +41,7 @@ public final class Executor {
             } catch (Exception e) {
                 return 1;
             }
-            
+
             containerState = "exited";
             while ("exited".equalsIgnoreCase(containerState)) {
                 containerInspect = dockerClient.inspectContainerCmd(containerId).exec();
@@ -66,7 +67,7 @@ public final class Executor {
             } catch (Exception e) {
                 return 1;
             }
-            
+
             containerState = "running";
             while ("running".equalsIgnoreCase(containerState)) {
                 containerInspect = dockerClient.inspectContainerCmd(containerId).exec();
@@ -76,9 +77,15 @@ public final class Executor {
         }
     }
 
+    /** Method for creating a new container with a specified name.
+     *
+     * @param imageName The name of the Image to be used for the new container.
+     * @param containerName The preferred container name.
+     * @return A String containing the appropriate message based on the outcome of attempting to create the new container.
+     */
     public static String createContainer(String imageName, String containerName) {
         try {
-            dockerClient.createContainerCmd(imageName+":latest")
+            dockerClient.createContainerCmd(imageName + ":latest")
                         .withName(containerName)
                         .exec();
             return "Created new container called " + containerName + " with Image " + imageName + ".";
@@ -91,13 +98,18 @@ public final class Executor {
         }
     }
 
+    /** Method for creating a new container with a default name.
+     *
+     * @param imageName The name of the Image to be used for the new container.
+     * @return A String containing the appropriate message based on the outcome of attempting to create the new container.
+     */
     public static String createContainer(String imageName) {
         try {
-            dockerClient.createContainerCmd(imageName+":latest")
+            dockerClient.createContainerCmd(imageName + ":latest")
                         .exec();
             return "Created new container with Image " + imageName + ".";
         } catch (Exception e) {
             return "Something went wrong when attempting to create a new container.";
         }
-    } 
+    }
 }
